@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: estacionamento-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/estacionamento}
+    username: ${DB_USERNAME:estacionamento}
+    password: ${DB_PASSWORD:estacionamento}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+parking:
+  capacity: ${PARKING_CAPACITY:50}
+  tariff:
+    initial-fee: ${PARKING_INITIAL_FEE:8.00}
+    hourly-fee: ${PARKING_HOURLY_FEE:4.00}
+    grace-period-minutes: ${PARKING_GRACE_MINUTES:0}
+
+app:
+  cli:
+    enabled: false

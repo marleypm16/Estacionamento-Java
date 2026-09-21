@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: Estacionamento API
+  version: 1.0.0
+  description: API para registrar entradas, saídas, ocupação e histórico de estadias.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/stays/entries:
+    post:
+      summary: Registra a entrada de um veículo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlateRequest'
+      responses:
+        '201':
+          description: Entrada registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingStay'
+        '400':
+          description: Placa inválida
+        '409':
+          description: Placa já possui estadia ativa ou estacionamento lotado
+  /api/v1/stays/exits:
+    post:
+      summary: Registra a saída e calcula a cobrança
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlateRequest'
+      responses:
+        '200':
+          description: Saída registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingStay'
+        '400':
+          description: Placa inválida
+        '404':
+          description: Não existe estadia ativa para a placa
+  /api/v1/stays:
+    get:
+      summary: Lista o histórico de estadias
+      parameters:
+        - name: plate
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, FINISHED]
+      responses:
+        '200':
+          description: Histórico
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingStay'
+  /api/v1/stays/active:
+    get:
+      summary: Lista estadias ativas
+      responses:
+        '200':
+          description: Estadias ativas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingStay'
+  /api/v1/stays/occupancy:
+    get:
+      summary: Consulta a ocupação atual
+      responses:
+        '200':
+          description: Ocupação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Occupancy'
+  /api/v1/stays/{id}:
+    get:
+      summary: Consulta uma estadia
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Estadia encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingStay'
+        '404':
+          description: Estadia não encontrada
+components:
+  schemas:
+    PlateRequest:
+      type: object
+      required: [plate]
+      properties:
+        plate:
+          type: string
+          example: ABC1D23
+    ParkingStay:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        plate:
+          type: string
+        enteredAt:
+          type: string
+          format: date-time
+        exitedAt:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, FINISHED]
+        amountCharged:
+          type: number
+          nullable: true
+        durationMinutes:
+          type: integer
+          format: int64
+          nullable: true
+    Occupancy:
+      type: object
+      properties:
+        capacity:
+          type: integer
+        occupied:
+          type: integer
+          format: int64
+        available:
+          type: integer
+          format: int64
