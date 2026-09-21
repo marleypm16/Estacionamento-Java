@@ -1,5 +1,8 @@
 ### IntelliJ IDEA ###
 out/
+target/
+.env
+*.log
 !**/src/main/**/out/
 !**/src/test/**/out/
 
