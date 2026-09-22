@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class ParkingProperties {
 
     private int capacity = 50;
+    private boolean demoData;
     private final TariffProperties tariff = new TariffProperties();
 
     public int getCapacity() {
@@ -17,6 +18,10 @@ public class ParkingProperties {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+
+    public boolean isDemoData() { return demoData; }
+
+    public void setDemoData(boolean demoData) { this.demoData = demoData; }
 
     public TariffProperties getTariff() {
         return tariff;

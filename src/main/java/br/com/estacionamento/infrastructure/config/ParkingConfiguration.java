@@ -1,7 +1,10 @@
 package br.com.estacionamento.infrastructure.config;
 
 import br.com.estacionamento.application.port.ParkingStayRepository;
+import br.com.estacionamento.application.port.PlateDetectionRepository;
+import br.com.estacionamento.application.service.OperationalReportService;
 import br.com.estacionamento.application.service.ParkingService;
+import br.com.estacionamento.application.service.PlateDetectionService;
 import br.com.estacionamento.domain.model.Tariff;
 import br.com.estacionamento.domain.service.DefaultTariffCalculator;
 import br.com.estacionamento.domain.service.TariffCalculator;
@@ -42,5 +45,15 @@ public class ParkingConfiguration {
                 tariff,
                 clock,
                 properties.getCapacity());
+    }
+
+    @Bean
+    OperationalReportService operationalReportService(ParkingStayRepository repository) {
+        return new OperationalReportService(repository);
+    }
+
+    @Bean
+    PlateDetectionService plateDetectionService(PlateDetectionRepository repository, ParkingService parkingService, Clock clock) {
+        return new PlateDetectionService(repository, parkingService, clock);
     }
 }

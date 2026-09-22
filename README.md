@@ -65,6 +65,22 @@ curl -X POST http://localhost:8080/api/v1/stays/entries \
   -d '{"plate":"ABC1D23"}'
 ```
 
+## Demonstração com Docker
+
+Para iniciar a API, PostgreSQL, migrations e duas estadias de demonstração:
+
+```bash
+docker compose up --build
+```
+
+O painel continua sendo iniciado em `frontend` com `npm run dev`. Para consultar histórico,
+relatórios e pendências de leitura na demonstração, use a chave `demo-admin-token` (ou defina
+`PARKING_ADMIN_TOKEN` em um arquivo `.env`). Para remover somente os dados de demonstração:
+
+```bash
+docker compose down -v
+```
+
 ## Executar o painel React
 
 Com a API em execução em outro terminal:
@@ -107,6 +123,15 @@ Os testes unitários usam relógio controlado; os testes de persistência usam H
 - Cada hora adicional iniciada cobra o valor por hora configurado.
 - Um período opcional de tolerância pode ser configurado em minutos.
 - Valores monetários usam `BigDecimal`.
+
+## Relatórios e leituras de placa
+
+- `GET /api/v1/reports/operations?from=2026-09-01&to=2026-09-30` retorna entradas, saídas,
+  receita e tempo médio de permanência. Requer `X-Admin-Token` quando configurado.
+- `POST /api/v1/plate-detections` recebe eventos de qualquer adaptador de câmera/OCR. Leituras
+  abaixo de 90%, entradas duplicadas e saídas sem estadia ativa permanecem como pendências.
+- `GET /api/v1/plate-detections/pending` e os endpoints de confirmação/dispensa permitem que o
+  atendente trate cada exceção. A integração de OCR não conhece a regra de tarifa nem o banco.
 
 ## Privacidade e acesso a dados de placas
 

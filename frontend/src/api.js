@@ -31,4 +31,8 @@ export const parkingApi = {
   getFinishedStays: (adminToken) => request('/api/v1/stays?status=FINISHED', { adminToken }),
   registerEntry: (plate) => request('/api/v1/stays/entries', { method: 'POST', body: { plate } }),
   registerExit: (plate) => request('/api/v1/stays/exits', { method: 'POST', body: { plate } }),
+  getOperationsReport: (from, to, adminToken) => request(`/api/v1/reports/operations?from=${from}&to=${to}`, { adminToken }),
+  getPendingDetections: (adminToken) => request('/api/v1/plate-detections/pending', { adminToken }),
+  confirmDetection: (id, plate, adminToken) => request(`/api/v1/plate-detections/${id}/confirm`, { method: 'POST', body: { plate }, adminToken }),
+  dismissDetection: (id, reason, adminToken) => request(`/api/v1/plate-detections/${id}/dismiss`, { method: 'POST', body: { reason }, adminToken }),
 }

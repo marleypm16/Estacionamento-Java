@@ -119,6 +119,101 @@ paths:
                 $ref: '#/components/schemas/ParkingStay'
         '404':
           description: Estadia não encontrada
+  /api/v1/reports/operations:
+    get:
+      summary: Operational metrics for a date range
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: X-Admin-Token
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Aggregated entries, exits, revenue and average stay duration
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OperationalReport' }
+        '403': { description: Administrative token is required }
+  /api/v1/plate-detections:
+    post:
+      summary: Receive a provider-neutral camera or OCR plate reading
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlateDetectionRequest' }
+      responses:
+        '201':
+          description: Reading accepted and either automatically processed or queued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlateDetection' }
+  /api/v1/plate-detections/pending:
+    get:
+      summary: List OCR readings awaiting attendant confirmation
+      parameters:
+        - name: X-Admin-Token
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Pending readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PlateDetection' }
+        '403': { description: Administrative token is required }
+  /api/v1/plate-detections/{id}/confirm:
+    post:
+      summary: Confirm a pending reading with the attendant-corrected plate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: X-Admin-Token
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlateRequest' }
+      responses:
+        '200':
+          description: Confirmed reading
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlateDetection' }
+  /api/v1/plate-detections/{id}/dismiss:
+    post:
+      summary: Dismiss a pending reading without parking movement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: X-Admin-Token
+          in: header
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Dismissed reading
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlateDetection' }
 components:
   schemas:
     PlateRequest:
@@ -164,3 +259,31 @@ components:
         available:
           type: integer
           format: int64
+    OperationalReport:
+      type: object
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        entries: { type: integer, format: int64 }
+        exits: { type: integer, format: int64 }
+        revenue: { type: number }
+        averageStayMinutes: { type: integer, format: int64 }
+    PlateDetectionRequest:
+      type: object
+      required: [plate, confidence, direction]
+      properties:
+        plate: { type: string, example: ABC1D23 }
+        confidence: { type: number, minimum: 0, maximum: 1, example: 0.96 }
+        direction: { type: string, enum: [ENTRY, EXIT] }
+        detectedAt: { type: string, format: date-time }
+    PlateDetection:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        rawPlate: { type: string }
+        confidence: { type: number }
+        direction: { type: string, enum: [ENTRY, EXIT] }
+        detectedAt: { type: string, format: date-time }
+        status: { type: string, enum: [PENDING, PROCESSED, DISMISSED] }
+        reason: { type: string, nullable: true }
+        resolvedAt: { type: string, format: date-time, nullable: true }

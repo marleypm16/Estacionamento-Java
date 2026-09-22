@@ -5,6 +5,7 @@ import br.com.estacionamento.application.exception.ActiveStayNotFoundException;
 import br.com.estacionamento.application.exception.AdministrativeAccessDeniedException;
 import br.com.estacionamento.application.exception.ParkingLotFullException;
 import br.com.estacionamento.application.exception.StayNotFoundException;
+import br.com.estacionamento.application.exception.DetectionNotFoundException;
 import br.com.estacionamento.interfaces.rest.dto.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,7 +34,7 @@ public class RestExceptionHandler {
         return build(HttpStatus.CONFLICT, "A operação conflita com o estado atual do estacionamento", request, Map.of());
     }
 
-    @ExceptionHandler({ActiveStayNotFoundException.class, StayNotFoundException.class})
+    @ExceptionHandler({ActiveStayNotFoundException.class, StayNotFoundException.class, DetectionNotFoundException.class})
     ResponseEntity<ApiError> handleNotFound(RuntimeException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
     }
