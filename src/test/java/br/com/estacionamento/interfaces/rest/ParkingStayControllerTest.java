@@ -29,6 +29,9 @@ class ParkingStayControllerTest {
     @MockitoBean
     private ParkingService parkingService;
 
+    @MockitoBean
+    private AdministrativeAccess administrativeAccess;
+
     @Test
     void shouldReturnCreatedForValidEntry() throws Exception {
         UUID id = UUID.randomUUID();

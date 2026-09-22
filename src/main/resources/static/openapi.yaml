@@ -50,6 +50,12 @@ paths:
     get:
       summary: Lista o histórico de estadias
       parameters:
+        - name: X-Admin-Token
+          in: header
+          required: false
+          description: Obrigatório quando PARKING_ADMIN_TOKEN estiver configurado.
+          schema:
+            type: string
         - name: plate
           in: query
           required: false
@@ -70,6 +76,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ParkingStay'
+        '403':
+          description: Token administrativo ausente ou inválido
   /api/v1/stays/active:
     get:
       summary: Lista estadias ativas

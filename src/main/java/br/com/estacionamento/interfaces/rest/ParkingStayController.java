@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
@@ -24,28 +27,38 @@ import java.util.UUID;
 @RequestMapping("/api/v1/stays")
 public class ParkingStayController {
 
-    private final ParkingService parkingService;
+    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("AUDIT");
 
-    public ParkingStayController(ParkingService parkingService) {
+    private final ParkingService parkingService;
+    private final AdministrativeAccess administrativeAccess;
+
+    public ParkingStayController(ParkingService parkingService, AdministrativeAccess administrativeAccess) {
         this.parkingService = parkingService;
+        this.administrativeAccess = administrativeAccess;
     }
 
     @PostMapping("/entries")
     public ResponseEntity<ParkingStayResponse> registerEntry(
             @Valid @RequestBody RegisterEntryRequest request) {
         ParkingStayResponse response = ParkingStayResponse.from(parkingService.registerEntry(request.plate()));
+        AUDIT_LOG.info("action=entry_registered stayId={} plate={}", response.id(), response.plate());
         return ResponseEntity.created(URI.create("/api/v1/stays/" + response.id())).body(response);
     }
 
     @PostMapping("/exits")
     public ParkingStayResponse registerExit(@Valid @RequestBody RegisterExitRequest request) {
-        return ParkingStayResponse.from(parkingService.registerExit(request.plate()));
+        ParkingStayResponse response = ParkingStayResponse.from(parkingService.registerExit(request.plate()));
+        AUDIT_LOG.info("action=exit_registered stayId={} plate={}", response.id(), response.plate());
+        return response;
     }
 
     @GetMapping
     public List<ParkingStayResponse> listAll(
             @RequestParam(required = false) String plate,
-            @RequestParam(required = false) StayStatus status) {
+            @RequestParam(required = false) StayStatus status,
+            @RequestHeader(name = "X-Admin-Token", required = false) String adminToken) {
+        administrativeAccess.require(adminToken);
+        AUDIT_LOG.info("action=history_consulted plateFilter={} statusFilter={}", plate, status);
         return parkingService.search(plate, status).stream().map(ParkingStayResponse::from).toList();
     }
 

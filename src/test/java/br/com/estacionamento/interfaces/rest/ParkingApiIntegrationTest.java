@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "parking.admin-token=test-admin-token")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -47,8 +47,17 @@ class ParkingApiIntegrationTest {
                 .andExpect(jsonPath("$.status").value("FINISHED"))
                 .andExpect(jsonPath("$.amountCharged").value(8.00));
 
-        mockMvc.perform(get("/api/v1/stays").param("status", "FINISHED"))
+        mockMvc.perform(get("/api/v1/stays")
+                        .param("status", "FINISHED")
+                        .header("X-Admin-Token", "test-admin-token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].plate").value("ABC1D23"));
+    }
+
+    @Test
+    void shouldRejectHistoryWithoutTheAdministrativeToken() throws Exception {
+        mockMvc.perform(get("/api/v1/stays"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("Acesso administrativo necessário para consultar o histórico"));
     }
 }

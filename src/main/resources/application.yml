@@ -14,11 +14,14 @@ spring:
 
 parking:
   capacity: ${PARKING_CAPACITY:50}
+  admin-token: ${PARKING_ADMIN_TOKEN:}
   tariff:
     initial-fee: ${PARKING_INITIAL_FEE:8.00}
     hourly-fee: ${PARKING_HOURLY_FEE:4.00}
     grace-period-minutes: ${PARKING_GRACE_MINUTES:0}
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
   cli:
     enabled: false

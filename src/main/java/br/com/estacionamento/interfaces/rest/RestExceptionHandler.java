@@ -2,6 +2,7 @@ package br.com.estacionamento.interfaces.rest;
 
 import br.com.estacionamento.application.exception.ActiveStayAlreadyExistsException;
 import br.com.estacionamento.application.exception.ActiveStayNotFoundException;
+import br.com.estacionamento.application.exception.AdministrativeAccessDeniedException;
 import br.com.estacionamento.application.exception.ParkingLotFullException;
 import br.com.estacionamento.application.exception.StayNotFoundException;
 import br.com.estacionamento.interfaces.rest.dto.ApiError;
@@ -35,6 +36,11 @@ public class RestExceptionHandler {
     @ExceptionHandler({ActiveStayNotFoundException.class, StayNotFoundException.class})
     ResponseEntity<ApiError> handleNotFound(RuntimeException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(AdministrativeAccessDeniedException.class)
+    ResponseEntity<ApiError> handleForbidden(AdministrativeAccessDeniedException exception, HttpServletRequest request) {
+        return build(HttpStatus.FORBIDDEN, exception.getMessage(), request, Map.of());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
